@@ -3,9 +3,9 @@ import numpy
 
 def build_args():
     parser = argparse.ArgumentParser(description='Calc powerrank.')
-    parser.add_argument('-m', help='the graph matrix', required=True)
+    parser.add_argument('-m', type=parse_matrix, help='the graph matrix', required=True)
     parser.add_argument('-b', type=float, help='beta', required=True)
-    parser.add_argument('-r', help='r', required=True)
+    parser.add_argument('-r', type=parse_matrix, help='r', required=True)
     return parser.parse_args()
 
 
@@ -17,15 +17,17 @@ def parse_matrix(matrix):
 
 if __name__ == '__main__':
     args = build_args()
-    m = parse_matrix(args.m)
-    r = parse_matrix(args.r).T
+    m = args.m
+    r = args.r.T
     b = args.b
 
     x1 = m.dot(b)
-    num_nodes = float(len(x1[0]))
-    x2 = numpy.array([[1 / num_nodes for x in range(int(num_nodes))]
-                       for x in range(int(num_nodes))])
-    x2 = x2.dot(0.3)
+    num_nodes = len(x1[0])
+
+    x2 = numpy.ones((num_nodes, num_nodes), dtype=numpy.float)
+    x2 = x2.dot(1./num_nodes)
+    x2 = x2.dot(1 - b)
+
     y = x1 + x2
 
     for x in xrange(1000000):
